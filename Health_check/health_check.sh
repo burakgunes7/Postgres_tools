@@ -82,13 +82,13 @@ if [ $node2_master -eq 1 ] && [ $IS_NODE1_DOWN == 0 ]; then
     else
         echo "[ $date ]  POSTGRES REMOVE FOLDER FAIL"
     fi
-    create_folder=$(ssh root@192.168.218.135 mkdir /mnt/volume1/postgresql/12/main/ && chown -R postgres:postgres /mnt/volume1/postgresql/12/*)
+    create_folder=$(ssh root@192.168.218.135 mkdir -p /mnt/volume1/postgresql/12/main/ && ssh root@192.168.218.135 chown -R postgres:postgres /mnt/)
     if [ $? -eq 1 ]; then
         echo "[ $date ] POSTGRES CREATE FOLDER OK"
     else
         echo "[ $date ] POSTGRES CREATE FOLDER FAIL"
     fi
-    backup=$(ssh root@192.168.218.136 sudo -u postgres pg_basebackup -h 192.168.218.135 -D /mnt/volume1/postgresql/12/main/ -U replicator -P -v -R -X stream -C -S slaveslot1)
+    backup=$(ssh postgres@192.168.218.135 sudo -u postgres pg_basebackup -h 192.168.218.136 -D /mnt/volume1/postgresql/12/main/ -U replicator -P -v -R -X stream -C -S slaveslot1)
     if [ $? -eq 1 ]; then
         echo "[ $date ] POSTGRES BACKUP SLAVESLOT1 OK"
     else
@@ -134,7 +134,12 @@ if [ $node1_master -eq 1 ] && [ $IS_NODE1_DOWN == 0 ]; then
         echo "[ $date ]  POSTGRES REMOVE FOLDER FAIL"
     fi
     create_folder=$(ssh root@192.168.218.136 mkdir /mnt/volume1/postgresql/12/main/ && chown -R postgres:postgres /mnt/volume1/postgresql/12/*)
-    backup=$(sudo -u postgres pg_basebackup -h 192.168.218.136 -D /mnt/volume1/postgresql/12/main/ -U replicator -P -v -R -X stream -C -S slaveslot1)
+    if [ $? -eq 1 ]; then
+        echo "[ $date ] POSTGRES CREATE FOLDER OK"
+    else
+        echo "[ $date ] POSTGRES CREATE FOLDER FAIL"
+    fi
+    backup=$(ssh postgres@192.168.218.136 sudo -u postgres pg_basebackup -h 192.168.218.135 -D /mnt/volume1/postgresql/12/main/ -U replicator -P -v -R -X stream -C -S slaveslot1)
     if [ $? -eq 1 ]; then
         echo "[ $date ] POSTGRES BACKUP SLAVESLOT1 OK"
     else
