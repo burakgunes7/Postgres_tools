@@ -17,7 +17,7 @@ else
     echo "[ $date ] REPLICA at $replica_cluster failed to be promoted to MASTER"
 fi
 
-if [ $replicaTo_master -eq 1 ] && [ $IS_NODE1_DOWN == 0 ]; then
+if [ $replicaTo_master -eq 1 ]; then
     remove=$(ssh root@$master_cluster sudo rm -rf /mnt/volume1)
     if [ $? -eq 0 ]; then
         echo "[ $date ] POSTGRES REMOVE FOLDER OK"
