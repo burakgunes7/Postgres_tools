@@ -1,6 +1,5 @@
 #!/bin/bash
-NODE1_IP=192.168.218.135
-NODE2_IP=192.168.218.136
+export $(grep -v '^#' .env | xargs)
 
 master_cluster=null
 replica_cluster=null
@@ -66,15 +65,13 @@ fi
 if [ "$NODE1_IP" = "$master_cluster" ] && ([ $IS_NODE1_DOWN -eq 1 ] || [ "$NODE1_SERVICE_STAT" != "active" ]); then
     echo "NODE1 IS MASTER AND DOWN"
     echo "Commencing Promote of NODE2..."
-    export master_cluster
-    export replica_cluster
-    /home/turkai/Desktop/Postgres/Health_check/promote_master.sh
-
-elif [ "$NODE2_IP" = "$master_cluster" ] && ([ $IS_NODE2_DOWN -eq 1 ] || [ "$NODE2_SERVICE_STAT" != "active" ]); then
+elif
+    [ "$NODE2_IP" = "$master_cluster" ] && ([ $IS_NODE2_DOWN -eq 1 ] || [ "$NODE2_SERVICE_STAT" != "active" ])
+then
     echo "NODE2 IS MASTER AND DOWN"
     echo "Commencing Promote of NODE1..."
-    export master_cluster
-    export replica_cluster
-    /home/turkai/Desktop/Postgres/Health_check/promote_master.sh
-
 fi
+
+export master_cluster
+export replica_cluster
+/home/turkai/Desktop/Postgres/Health_check/promote_master.sh
