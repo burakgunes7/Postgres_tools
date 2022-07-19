@@ -29,9 +29,9 @@ health_check() {
         #   CHECK THE POSTGRES SERVER IF THE SERVER IS UP
         NODE1_SERVICE_STAT=$(ssh root@$NODE1_IP systemctl is-active postgresql@12-main)
         if [ "$NODE1_SERVICE_STAT" == "active" ]; then
-            echo "[ $date ] NODE1 POSTGRES SERVICE is UP"
+            echo "[ $date ] NODE1 POSTGRES SERVICE IS UP"
         else
-            echo "[ $date ] NODE1 POSTGRES SERVICE is DOWN"
+            echo "[ $date ] NODE1 POSTGRES SERVICE IS DOWN"
         fi
     fi
 
@@ -69,17 +69,17 @@ health_check() {
 
         find=$(ssh root@$NODE2_IP find /mnt/volume1/postgresql/12/main/ -name standby.signal)
         if [ "$find" != "/mnt/volume1/postgresql/12/main/standby.signal" ]; then
-            echo -e "\n[ $date ] NODE2 is MASTER CLUSTER "
+            echo -e "\n[ $date ] NODE2 IS MASTER CLUSTER "
             master_cluster=$NODE2_IP
         else
-            echo -e "\n[ $date ] NODE2 is REPLICA CLUSTER"
+            echo -e "\n[ $date ] NODE2 IS REPLICA CLUSTER"
             replica_cluster=$NODE2_IP
         fi
     fi
 
     if [ "$NODE1_IP" = "$master_cluster" ] && ([ $IS_NODE1_DOWN -eq 1 ] || [ "$NODE1_SERVICE_STAT" != "active" ]); then
         echo -e "\n[ $date ] NODE1 IS MASTER AND DOWN"
-        echo "[ $date ] Commencing Promote of NODE2..."
+        echo "[ $date ] COMMENCING PROMOTE OF NODE2..."
         promote+=1
         export master_cluster
         export IS_NODE1_DOWN
@@ -94,7 +94,7 @@ health_check() {
         [ "$NODE2_IP" = "$master_cluster" ] && ([ $IS_NODE2_DOWN -eq 1 ] || [ "$NODE2_SERVICE_STAT" != "active" ])
     then
         echo -e "\n[ $date ] NODE2 IS MASTER AND DOWN"
-        echo "[ $date ] Commencing Promote of NODE1..."
+        echo "[ $date ] COMMENCING PROMOTE OF NODE1..."
         promote+=1
         export master_cluster
         export IS_NODE1_DOWN

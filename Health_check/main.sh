@@ -18,11 +18,11 @@ echo -e "\n[ $date ] HEALTH CHECK STARTING..."
 
 health_check
 
-# IF HEALTH CHECK RETURNS PROMOTE == 1 PROMOTE MASTER
+# IF HEALTH CHECK RETURNS PROMOTE == 1 , PROMOTE MASTER
 if [[ $promote -eq 1 ]]; then
     . /home/turkai/Desktop/Postgres/Health_check/promote_master.sh
 
     promote_master
 else
-    echo -e "\n[ $date ] MASTER IS UP AND RUNNING."
+    echo -e "\n[ $date ] MASTER IS UP AND RUNNING"
 fi
