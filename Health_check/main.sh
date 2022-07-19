@@ -20,7 +20,6 @@ health_check
 
 # IF HEALTH CHECK RETURNS PROMOTE == 1 PROMOTE MASTER
 if [[ $promote -eq 1 ]]; then
-    echo "PROMOTE"
     . /home/turkai/Desktop/Postgres/Health_check/promote_master.sh
 
     promote_master

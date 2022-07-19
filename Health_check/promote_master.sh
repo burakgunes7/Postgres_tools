@@ -7,17 +7,25 @@ promote_master() {
     color=$(tput setaf 111)
     echo ${color}
 
-    # NODE 1 IS DOWN BUT NODE 2 IS UP || NODE 1 IS UP BUT SERVICE IS DOWN
-    #
-    promote=$(ssh root@$replica_cluster sudo pg_ctlcluster 12 main promote)
-    if [ $? -eq 0 ]; then
-        echo "[ $date ] REPLICA at $replica_cluster successfully promoted to MASTER"
-        replicaTo_master=1
-    else
-        echo "[ $date ] REPLICA at $replica_cluster failed to be promoted to MASTER"
+    REPLICA_SERVICE_STAT=$(ssh root@$replica_cluster systemctl is-active postgresql@12-main)
+    if [ "$REPLICA_SERVICE_STAT" == "active" ]; then
+        promote=$(ssh root@$replica_cluster sudo pg_ctlcluster 12 main promote)
+        if [ $? -eq 0 ]; then
+            echo "[ $date ] REPLICA AT $replica_cluster SUCCESSFULLY PROMOTED TO MASTER"
+            replicaTo_master=1
+        else
+            echo -e "\n[ $date ] TRYING TO START POSTGRES SERVICE AT REPLICA"
+            start_service=$(ssh root@$replica_cluster systemctl start postgresql@12-main)
+            if [ $? -eq 0 ]; then
+                echo "[ $date ] POSTGRES SERVICE AT REPLICA START SUCCESS"
+                replicaTo_master=1
+            else
+                echo "[ $date ] POSTGRES SERVICE AT REPLICA START FAIL"
+            fi
+        fi
     fi
 
-    if [ $replicaTo_master -eq 1 ]; then
+    if [[ $replicaTo_master -eq 1 ]]; then
         remove_main_folder=$(ssh root@$master_cluster sudo rm -rf /mnt/volume1)
         if [ $? -eq 0 ]; then
             echo "[ $date ] POSTGRES REMOVE FOLDER OK"
@@ -43,15 +51,15 @@ promote_master() {
             echo "[ $date ] POSTGRES BACKUP SLAVESLOT1 FAIL"
         fi
 
-        start_service=$(ssh root@$master_cluster systemctl start postgresql@12-main)
-        if [ $? -eq 0 ]; then
-            echo "[ $date ] POSTGRES SERVICE START OK"
-        else
-            echo "[ $date ] POSTGRES SERVICE START FAIL"
-        fi
-
         permission=$(ssh root@$master_cluster sudo chmod 700 -R /mnt/volume1/postgresql/12/main/)
 
-        conf_reload=$(ssh root@$master_cluster pg_ctlcluster 12 main reload)
+        start_service=$(ssh root@$master_cluster systemctl start postgresql@12-main)
+        if [ $? -eq 0 ]; then
+            echo "[ $date ] POSTGRES SERVICE AT NEW REPLICA START SUCCESS"
+            replicaTo_master=1
+        else
+            echo "[ $date ] POSTGRES SERVICE AT NEW REPLICA START FAIL"
+        fi
+
     fi
 }
