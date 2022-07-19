@@ -11,10 +11,12 @@ health_check() {
 
     FAIL=0
 
+    PROMOTE=0
+
     date=$(date)
 
-    kindalightblue=$(tput setaf 123)
-    echo ${kindalightblue}
+    color=$(tput setaf 123)
+    echo ${color}
 
     # PING NODE_1 TO CHECK IF SERVER IS UP
     ping -c 3 $NODE1_IP >/dev/null 2>&1
@@ -75,27 +77,33 @@ health_check() {
         fi
     fi
 
-    export master_cluster
-    export IS_NODE1_DOWN
-    export NODE1_SERVICE_STAT
-    export replica_cluster
-    export IS_NODE2_DOWN
-    export NODE2_SERVICE_STAT
+    if [ "$NODE1_IP" = "$master_cluster" ] && ([ $IS_NODE1_DOWN -eq 1 ] || [ "$NODE1_SERVICE_STAT" != "active" ]); then
+        echo "[ $date ] NODE1 IS MASTER AND DOWN"
+        echo "[ $date ] Commencing Promote of NODE2..."
+        promote+=1
+        export master_cluster
+        export IS_NODE1_DOWN
+        export NODE1_SERVICE_STAT
+        export replica_cluster
+        export IS_NODE2_DOWN
+        export NODE2_SERVICE_STAT
+
+        export promote
+
+    elif
+        [ "$NODE2_IP" = "$master_cluster" ] && ([ $IS_NODE2_DOWN -eq 1 ] || [ "$NODE2_SERVICE_STAT" != "active" ])
+    then
+        echo "[ $date ] NODE2 IS MASTER AND DOWN"
+        echo "[ $date ] Commencing Promote of NODE1..."
+        promote+=1
+        export master_cluster
+        export IS_NODE1_DOWN
+        export NODE1_SERVICE_STAT
+        export replica_cluster
+        export IS_NODE2_DOWN
+        export NODE2_SERVICE_STAT
+
+        export promote
+    fi
+
 }
-# if [ "$NODE1_IP" = "$master_cluster" ] && ([ $IS_NODE1_DOWN -eq 1 ] || [ "$NODE1_SERVICE_STAT" != "active" ]); then
-#     echo "NODE1 IS MASTER AND DOWN"
-#     echo "Commencing Promote of NODE2..."
-
-#     export master_cluster
-#     export replica_cluster
-#     /home/turkai/Desktop/Postgres/Health_check/promote_master.sh
-# elif
-#     [ "$NODE2_IP" = "$master_cluster" ] && ([ $IS_NODE2_DOWN -eq 1 ] || [ "$NODE2_SERVICE_STAT" != "active" ])
-# then
-#     echo "NODE2 IS MASTER AND DOWN"
-#     echo "Commencing Promote of NODE1..."
-
-#     export master_cluster
-#     export replica_cluster
-#     /home/turkai/Desktop/Postgres/Health_check/promote_master.sh
-# fi

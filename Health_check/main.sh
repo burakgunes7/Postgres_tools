@@ -2,31 +2,28 @@
 
 export $(grep -v '^#' .env | xargs)
 
-echo -e "\nNode IP's :"
-echo $NODE1_IP
-echo $NODE2_IP
+color=$(tput setaf 115)
+echo ${color}
+
+date=$(date)
+
+echo -e "\n[ $date ] NODE IP'S :"
+echo "[ $date ] NODE 1 : $NODE1_IP"
+echo "[ $date ] NODE 2 : $NODE2_IP"
 
 # HEALTH CHECK STARTS
-echo -e "\nHealth Check Starting...\n"
+echo -e "\n[ $date ] HEALTH CHECK STARTING..."
 
 . /home/turkai/Desktop/Postgres/Health_check/health_check.sh
 
 health_check
 
-if [ "$NODE1_IP" = "$master_cluster" ] && ([ $IS_NODE1_DOWN -eq 1 ] || [ "$NODE1_SERVICE_STAT" != "active" ]); then
-    echo "NODE1 IS MASTER AND DOWN"
-    echo "Commencing Promote of NODE2..."
+# IF HEALTH CHECK RETURNS PROMOTE == 1 PROMOTE MASTER
+if [[ $promote -eq 1 ]]; then
+    echo "PROMOTE"
+    . /home/turkai/Desktop/Postgres/Health_check/promote_master.sh
 
-    export master_cluster
-    export replica_cluster
-    # /home/turkai/Desktop/Postgres/Health_check/promote_master.sh
-elif
-    [ "$NODE2_IP" = "$master_cluster" ] && ([ $IS_NODE2_DOWN -eq 1 ] || [ "$NODE2_SERVICE_STAT" != "active" ])
-then
-    echo "NODE2 IS MASTER AND DOWN"
-    echo "Commencing Promote of NODE1..."
-
-    export master_cluster
-    export replica_cluster
-    # /home/turkai/Desktop/Postgres/Health_check/promote_master.sh
+    promote_master
+else
+    echo -e "\n[ $date ] MASTER IS UP AND RUNNING."
 fi
