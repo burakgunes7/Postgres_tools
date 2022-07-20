@@ -22,7 +22,7 @@ health_check() {
     ping -c 3 $NODE1_IP >/dev/null 2>&1
     if [ $? -ne 0 ]; then
         IS_NODE1_DOWN=1
-        echo "[ $date ]  NODE1 POSTGRES SERVER IS DOWN"
+        echo "[ $date ] NODE1 POSTGRES SERVER IS DOWN"
     else
         echo "[ $date ] NODE1 POSTGRES SERVER IS UP"
 
@@ -80,6 +80,7 @@ health_check() {
     if [ "$NODE1_IP" = "$master_cluster" ] && ([ $IS_NODE1_DOWN -eq 1 ] || [ "$NODE1_SERVICE_STAT" != "active" ]); then
         echo -e "\n[ $date ] NODE1 IS MASTER AND DOWN"
         echo "[ $date ] COMMENCING PROMOTE OF NODE2..."
+
         promote+=1
         export master_cluster
         export IS_NODE1_DOWN
@@ -95,6 +96,7 @@ health_check() {
     then
         echo -e "\n[ $date ] NODE2 IS MASTER AND DOWN"
         echo "[ $date ] COMMENCING PROMOTE OF NODE1..."
+
         promote+=1
         export master_cluster
         export IS_NODE1_DOWN
